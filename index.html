@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Командная игра - Выбор персонажа</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #playerView, #gmView, #characterSelection {
+            display: none;
+            height: 100vh;
+            grid-template-rows: auto 1fr auto;
+        }
+
+        #characterSelection {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            padding: 20px;
+        }
+
+        .character-selection-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .character-selection-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .character-selection-header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .character-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .character-card.selected {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.2);
+            transform: scale(1.02);
+        }
+
+        .character-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .character-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .character-name {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .character-description {
+            margin-bottom: 15px;
+            line-height: 1.4;
+            opacity: 0.9;
+        }
+
+        .character-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .stat-name {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+
+        .confirm-selection {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .confirm-btn {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .confirm-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .confirm-btn:not(:disabled):hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .character-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .ready-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 20px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .ready-btn.not-ready {
+            background: #f44336;
+        }
+
+        .ready-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 10px;
+            padding: 10px;
+            height: calc(100vh - 120px);
+        }
+
+        .members-panel {
+            overflow-y: auto;
+        }
+
+        .member-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+
+        .member-stats {
+            font-size: 0.8em;
+            color: #ccc;
+        }
+
+        .room-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .room-background {
+            flex: 1;
+            background: linear-gradient(45deg, #2c3e50, #34495e);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .room-description {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .actions-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.6;
+            text-align: left;
+        }
+
+        .bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 0 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            width: 30%;
+            transition: width 0.3s;
+        }
+
+        .gm-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .gm-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            background: #2196F3;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .gm-btn:hover {
+            background: #1976D2;
+        }
+
+        .start-game-btn {
+            background: #4CAF50;
+        }
+
+        .start-game-btn:hover {
+            background: #45a049;
+        }
+
+        .active-actions {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+        }
+
+        .turn-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .random-result {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+
+        .role-selector {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            color: #333;
+        }
+
+        .role-btn {
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            background: #2196F3;
+            color: white;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-btn:hover {
+            transform: scale(1.05);
+            background: #1976D2;
+        }
+
+        .role-btn.gm {
+            background: #FF9800;
+        }
+
+        .role-btn.gm:hover {
+            background: #F57C00;
+        }
+    </style>
+</head>
+<body>
+    <div class="role-selector">
+        <h2>Выберите вашу роль</h2>
+        <button class="role-btn player" onclick="selectRole('player')">Участник команды</button>
+        <button class="role-btn gm" onclick="selectRole('gm')">Гейм-мастер</button>
+    </div>
+
+    <div id="characterSelection">
+        <div class="character-selection-header">
+            <h1>Выберите своего персонажа</h1>
+            <p>Каждый класс имеет уникальные характеристики и способности</p>
+        </div>
+        <div class="characters-grid" id="charactersGrid">
+        </div>
+        <div class="confirm-selection">
+            <button class="confirm-btn" id="confirmSelection" disabled onclick="confirmCharacterSelection()">Подтвердить выбор</button>
+        </div>
+    </div>
+
+    <div id="playerView">
+        <div class="top-bar">
+            <div class="user-info">
+                <span>Игрок: <span id="playerName">Гость</span></span>
+                <span class="character-badge" id="playerClass">Не выбран</span>
+                <span>Команда: Альфа</span>
+            </div>
+            <button class="ready-btn not-ready" onclick="toggleReady()">Не готов</button>
+        </div>
+
+        <div class="main-content">
+            <div class="panel members-panel">
+                <h3>Участники команды</h3>
+                <div class="member-card">
+                    <div class="avatar">В</div>
+                    <div>
+                        <div>Алексей</div>
+                        <div class="member-stats">Воин-смешинка | Сил: 8 Лов: 5 Инт: 3</div>
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="avatar">К</div>
+                    <div>
+                        <div>Мария</div>
+                        <div class="member-stats">Колдун-юморист | Сил: 2 Лов: 4 Инт: 10</div>
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="avatar" id="currentPlayerAvatar">?</div>
+                    <div>
+                        <div id="currentPlayerName">Вы</div>
+                        <div class="member-stats" id="currentPlayerStats">Не выбран | Сил: 0 Лов: 0 Инт: 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel room-panel">
+                <div class="room-background">
+                    Тронный зал замка
+                </div>
+                <div class="room-description">
+                    Вы находитесь в величественном тронном зале. Высокие сводчатые потолки, витражи из цветного стекла и древние гобелены украшают стены. В центре зала стоит массивный трон из темного дерева.
+                </div>
+            </div>
+
+            <div class="panel actions-panel">
+                <h3>Доступные действия</h3>
+                <button class="action-btn">Осмотреть трон</button>
+                <button class="action-btn">Изучить гобелены</button>
+                <button class="action-btn">Проверить пол</button>
+                <button class="action-btn">Исследовать витражи</button>
+                <button class="action-btn">Отдохнуть</button>
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <span>Прогресс команды:</span>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <span>3/10 успешных действий</span>
+        </div>
+    </div>
+
+    <div id="gmView">
+        <div class="top-bar">
+            <div class="user-info">
+                <span>Гейм-мастер: Дмитрий</span>
+            </div>
+            <button class="ready-btn start-game-btn">Начать игру</button>
+        </div>
+
+        <div class="main-content">
+            <div class="panel members-panel">
+                <h3>Команды и участники</h3>
+                <div class="gm-controls">
+                    <button class="gm-btn">Переместить в комнату</button>
+                    <button class="gm-btn">Добавить эффект</button>
+                </div>
+                <div class="member-card">
+                    <div class="avatar">А</div>
+                    <div>
+                        <div>Команда Альфа</div>
+                        <div class="member-stats">Алексей, Мария, <span id="gmPlayerName">Игрок</span></div>
+                    </div>
+                </div>
+                <div class="member-card">
+                    <div class="avatar">Б</div>
+                    <div>
+                        <div>Команда Бета</div>
+                        <div class="member-stats">Ольга, Петр, Светлана</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel room-panel">
+                <div class="room-background">
+                    Тронный зал замка
+                </div>
+                <div class="room-description">
+                    Вы находитесь в величественном тронном зале. Высокие сводчатые потолки, витражи из цветного стекла и древние гобелены украшают стены. В центре зала стоит массивный трон из темного дерева.
+                </div>
+                <div class="active-actions">
+                    <h4>Активные действия команд:</h4>
+                    <p>Команда Альфа: Исследует трон</p>
+                    <p>Команда Бета: Изучает гобелены</p>
+                </div>
+            </div>
+
+            <div class="panel actions-panel">
+                <h3>Управление игрой</h3>
+                <div class="turn-info">
+                    <span>Текущий ход: 5</span>
+                    <span>Активная команда: Альфа</span>
+                </div>
+                <div class="random-result">
+                    Бросок кубов: 3d6 = [2, 4, 1] = 7
+                </div>
+                <button class="gm-btn" style="margin-top: 15px; width: 100%;">Далее</button>
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <div class="turn-info">
+                <span>Ход №5</span>
+                <span>Команда: Альфа</span>
+                <div class="random-result">
+                    Результат: Успех (сложность 10)
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const characterClasses = [
+            {
+                "id": "warrior",
+                "name": "Воин-смешинка",
+                "description": "Любит шутки и побрякушки, силен в физических действиях, но не всегда умен.",
+                "stats": {
+                    "strength": 8,
+                    "dexterity": 5,
+                    "intelligence": 3
+                }
+            },
+            {
+                "id": "rogue",
+                "name": "Хитрый воришка",
+                "description": "Мастер ловкости и прокрастинации. Всегда найдет способ пробраться незаметно.",
+                "stats": {
+                    "strength": 4,
+                    "dexterity": 9,
+                    "intelligence": 5
+                }
+            },
+            {
+                "id": "wizard",
+                "name": "Колдун-юморист",
+                "description": "Умный и странный маг, любит эксперименты и нелепые заклинания.",
+                "stats": {
+                    "strength": 2,
+                    "dexterity": 4,
+                    "intelligence": 10
+                }
+            },
+            {
+                "id": "bard",
+                "name": "Бард-шутник",
+                "description": "Обожает музыку и шутки, умеет отвлечь врагов и подбодрить команду.",
+                "stats": {
+                    "strength": 3,
+                    "dexterity": 6,
+                    "intelligence": 7
+                }
+            },
+            {
+                "id": "paladin",
+                "name": "Паладин-почтальон",
+                "description": "Сильный, стойкий и иногда слишком серьезный. Любит доставлять справедливость... и письма.",
+                "stats": {
+                    "strength": 7,
+                    "dexterity": 4,
+                    "intelligence": 5
+                }
+            },
+            {
+                "id": "ranger",
+                "name": "Следопыт-неумеха",
+                "description": "Отлично ориентируется в лесах, но иногда спотыкается о собственные ботинки.",
+                "stats": {
+                    "strength": 5,
+                    "dexterity": 8,
+                    "intelligence": 4
+                }
+            }
+        ];
+
+        let selectedCharacter = null;
+
+        function selectRole(role) {
+            document.querySelector('.role-selector').style.display = 'none';
+            
+            if (role === 'player') {
+                showCharacterSelection();
+            } else {
+                document.getElementById('gmView').style.display = 'grid';
+            }
+        }
+
+        function showCharacterSelection() {
+            document.getElementById('characterSelection').style.display = 'grid';
+            const grid = document.getElementById('charactersGrid');
+            grid.innerHTML = '';
+
+            characterClasses.forEach(char => {
+                const card = document.createElement('div');
+                card.className = 'character-card';
+                card.onclick = () => selectCharacter(char, card);
+                
+                card.innerHTML = `
+                    <div class="character-header">
+                        <div class="character-avatar">${char.name.charAt(0)}</div>
+                        <div class="character-name">${char.name}</div>
+                    </div>
+                    <div class="character-description">${char.description}</div>
+                    <div class="character-stats">
+                        <div class="stat">
+                            <div class="stat-value">${char.stats.strength}</div>
+                            <div class="stat-name">Сила</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${char.stats.dexterity}</div>
+                            <div class="stat-name">Ловкость</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${char.stats.intelligence}</div>
+                            <div class="stat-name">Интеллект</div>
+                        </div>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+
+        function selectCharacter(character, element) {
+            document.querySelectorAll('.character-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            element.classList.add('selected');
+            selectedCharacter = character;
+            
+            document.getElementById('confirmSelection').disabled = false;
+        }
+
+        function confirmCharacterSelection() {
+            if (!selectedCharacter) return;
+
+            document.getElementById('playerName').textContent = 'Игрок';
+            document.getElementById('playerClass').textContent = selectedCharacter.name;
+            document.getElementById('currentPlayerName').textContent = 'Вы (' + selectedCharacter.name + ')';
+            document.getElementById('currentPlayerAvatar').textContent = selectedCharacter.name.charAt(0);
+            document.getElementById('currentPlayerStats').textContent = 
+                `${selectedCharacter.name} | Сил: ${selectedCharacter.stats.strength} Лов: ${selectedCharacter.stats.dexterity} Инт: ${selectedCharacter.stats.intelligence}`;
+            
+            document.getElementById('gmPlayerName').textContent = 'Игрок (' + selectedCharacter.name + ')';
+
+            document.getElementById('characterSelection').style.display = 'none';
+            document.getElementById('playerView').style.display = 'grid';
+        }
+
+        function toggleReady() {
+            const btn = document.querySelector('.ready-btn');
+            if (btn.classList.contains('not-ready')) {
+                btn.classList.remove('not-ready');
+                btn.textContent = 'Готов';
+            } else {
+                btn.classList.add('not-ready');
+                btn.textContent = 'Не готов';
+            }
+        }
+
+        document.getElementById('playerView').style.display = 'none';
+        document.getElementById('gmView').style.display = 'none';
+        document.getElementById('characterSelection').style.display = 'none';
+    </script>
+</body>
+</html>
