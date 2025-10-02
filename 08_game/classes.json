@@ -1,0 +1,62 @@
+[
+    {
+        "id": "warrior",
+        "name": "Воин-смешинка",
+        "description": "Любит шутки и побрякушки, силен в физических действиях, но не всегда умен.",
+        "stats": {
+            "strength": 8,
+            "dexterity": 5,
+            "intelligence": 3
+        }
+    },
+    {
+        "id": "rogue",
+        "name": "Хитрый воришка",
+        "description": "Мастер ловкости и прокрастинации. Всегда найдет способ пробраться незаметно.",
+        "stats": {
+            "strength": 4,
+            "dexterity": 9,
+            "intelligence": 5
+        }
+    },
+    {
+        "id": "wizard",
+        "name": "Колдун-юморист",
+        "description": "Умный и странный маг, любит эксперименты и нелепые заклинания.",
+        "stats": {
+            "strength": 2,
+            "dexterity": 4,
+            "intelligence": 10
+        }
+    },
+    {
+        "id": "bard",
+        "name": "Бард-шутник",
+        "description": "Обожает музыку и шутки, умеет отвлечь врагов и подбодрить команду.",
+        "stats": {
+            "strength": 3,
+            "dexterity": 6,
+            "intelligence": 7
+        }
+    },
+    {
+        "id": "paladin",
+        "name": "Паладин-почтальон",
+        "description": "Сильный, стойкий и иногда слишком серьезный. Любит доставлять справедливость... и письма.",
+        "stats": {
+            "strength": 7,
+            "dexterity": 4,
+            "intelligence": 5
+        }
+    },
+    {
+        "id": "ranger",
+        "name": "Следопыт-неумеха",
+        "description": "Отлично ориентируется в лесах, но иногда спотыкается о собственные ботинки.",
+        "stats": {
+            "strength": 5,
+            "dexterity": 8,
+            "intelligence": 4
+        }
+    }
+]
