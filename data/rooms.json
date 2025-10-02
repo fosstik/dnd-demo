@@ -1,0 +1,56 @@
+{
+  "room1": {
+    "id": "room1",
+    "type": "unique",
+    "name": "Стартовая локация",
+    "background": "start_bg",
+    "description": "Вы находитесь в древнем храме. Перед вами три загадочные двери.",
+    "technique": "Техника ветвления путей",
+    "actions": [
+      {
+        "id": "action1",
+        "name": "Открыть левую дверь",
+        "stat": "strength",
+        "available": true,
+        "action_result": {
+          "perfect": "Дверь легко поддается и открывается",
+          "success": "Дверь скрипит, но открывается",
+          "failure": "Дверь не поддается"
+        }
+      },
+      {
+        "id": "action2",
+        "name": "Исследовать правую дверь",
+        "stat": "intelligence",
+        "available": true,
+        "action_result": {
+          "perfect": "Вы находите скрытый механизм",
+          "success": "Вы замечаете подозрительные следы",
+          "failure": "Ничего необычного не обнаружено"
+        }
+      }
+    ]
+  },
+  "room2": {
+    "id": "room2",
+    "type": "common",
+    "name": "Зал загадок",
+    "background": "puzzle_bg",
+    "description": "Большой зал с древними механизмами. Требуется совместное решение.",
+    "technique": "Кооперативный геймплей",
+    "required_successes": 4,
+    "actions": [
+      {
+        "id": "action3",
+        "name": "Активировать центральный механизм",
+        "stat": "dexterity",
+        "available": true,
+        "action_result": {
+          "perfect": "Механизм активирован идеально",
+          "success": "Механизм работает с перебоями",
+          "failure": "Механизм заклинило"
+        }
+      }
+    ]
+  }
+}
